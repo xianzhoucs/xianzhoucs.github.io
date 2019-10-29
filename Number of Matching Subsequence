@@ -1,0 +1,133 @@
+This file is the notes of leetcode792. Number of Matching Subsequences and leetcode1055. Shortest Way to Form Strings.
+The ideas of these two problems are similar, I will writes several different solutions.
+
+1. Brute Force Solution
+The most straight-forward idea is use two pointers, i for the word and j for the source strings. compare one by one
+for each word[i], if source[j] == word[i]: i += 1, j += 1; else: j += 1
+If j reach the end of the source string and i doesn't reach the end of word, then word is not a subsequence of source string.
+
+Python code for leetcode 792:(Accepted, faster than 5%)
+
+class Solution:
+    def numMatchingSubseq(self, S: str, words: List[str]) -> int:
+        S = list(S)
+        def subsequence(S, word):
+            word = list(word)
+            w = len(word)
+            s = len(S)
+            i = 0
+            j = 0
+            while i < w and j < s:
+                if word[i] == S[j]:
+                    i += 1
+                    j += 1
+                else: 
+                    j += 1
+            if i < w:
+                return False
+            else:
+                return True
+        
+        words = collections.Counter(words)
+        count = 0
+        for word in words:
+            if subsequence(S, word):
+                count += words[word]
+        
+        return count
+
+Python code for leetcode 1055: (Time Limit exceeded)
+class Solution:
+    def shortestWay(self, source: str, target: str) -> int:
+        if len(set(source)) < len(set(target)):
+            return -1
+        
+        count = 0
+        s = len(source)
+        t = len(target)
+        i, j = 0, 0
+        while j < t:
+            if target[j] == source[i]:
+                i += 1
+                j += 1
+                if i >= s:
+                    i = 0
+                    count += 1
+            else:
+                i += 1
+                if i >= s:
+                    i = 0
+                    count += 1
+        if 0 < i < s:
+            count += 1
+            
+        return count
+        
+2. Optimized, Use String.find()
+The idea is similar, but use an existed function string.find()
+string.find(str, beg = 0, end = len(string))
+This is a function in python. It is used to find the begining index of str in string
+string is the string to be searched in.
+str is the string to be searched.
+beg = 0, this is the starting index, by default 0
+end = len(string), the ending index, by default len(string)
+
+For example: string = 'aabbcef'
+i = 0
+>>> string.find('b', i)
+>>> 2
+>>> i = string.find('b', i)
+>>> i
+>>> 2
+>>> i = string.find('b', i+1)
+>>> i
+>>> 3
+if there is no str in string, return -1
+
+Python code for leetcode 792 using string.find()
+class Solution:
+    def numMatchingSubseq(self, S: str, words: List[str]) -> int:
+        def subsequence(S, word):
+            i = 0
+            for w in word:
+                i = S.find(w, i)
+                if i == -1:
+                    return False
+                i += 1
+            return True
+        
+        words = collections.Counter(words)
+        count = 0
+        for word in words:
+            if subsequence(S, word):
+                count += words[word]
+        
+        return count
+        
+Python code for leetcode 1055 using string.find()
+class Solution:
+    def shortestWay(self, source: str, target: str) -> int:
+        if len(set(source)) < len(set(target)):
+            return -1
+        
+        count = 0
+        s = len(source)
+        t = len(target)
+        i = 0
+        for j in target:
+            i = source.find(j, i)
+            if i == -1:
+                #sorce已经找到头了，没找到
+                count += 1
+                i = source.find(j, 0)
+                #从头开始找
+                if i == -1:
+                    #从头找还是找不到，那么就说明不行
+                    return -1
+            i += 1 #i是source中j的index位置，下一次寻找，要从下一个开始
+                
+        return count + 1
+        
+3. Binary Search (To be updated)
+ 
+
